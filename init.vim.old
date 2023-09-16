@@ -1,0 +1,441 @@
+set wildmenu 
+set mouse=a 
+set number
+set signcolumn=yes
+set encoding=utf-8
+set hidden
+set nobackup
+set nowritebackup
+set cmdheight=1
+set updatetime=300
+set shortmess+=c
+" set relativenumber
+" set cmdheight=2
+set t_Co=256 
+" let &t_ZH="\e[3m"
+" let &t_ZR="\e[23m"
+set ttimeoutlen=0
+set splitbelow splitright
+"set nowrap  " No dividir la línea si es muy larga
+" Indentación a 2 espacios
+set smarttab
+set nolist
+set tabstop=2
+set shiftwidth=2
+set backupcopy=yes
+set softtabstop=2
+set shiftround
+set expandtab  " Insertar espacios en lugar de <Tab>s
+set autoindent
+set showmatch
+set smartindent
+"set indentexpr=
+" set clipboard+=unnamedplus
+set hidden  " Permitir cambiar de buffers sin tener que guardarlos
+
+set ignorecase  " Ignorar mayúsculas al hacer una búsqueda
+set smartcase  " No ignorar mayúsculas si la palabra a buscar contiene mayúsculas
+
+set spelllang=en,es  " Corregir palabras usando diccionarios en inglés y español
+set updatetime=100
+
+set termguicolors  " Activa true colors en la terminal
+set background=dark " Fondo del tema: light o dark
+
+"Little hack to fix the split scroll problem
+set guioptions+=aem
+map <leader> <space>
+
+call plug#begin("~/.config/nvim/plugged")
+Plug 'jiangmiao/auto-pairs'
+Plug 'tpope/vim-surround'
+Plug 'preservim/nerdcommenter'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'mg979/vim-visual-multi'
+Plug 'terrortylor/nvim-comment'
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'kyazdani42/nvim-tree.lua'
+Plug 'tpope/vim-fugitive'
+Plug 'phaazon/hop.nvim'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'norcalli/nvim-colorizer.lua'
+Plug 'savq/melange-nvim' 
+Plug 'folke/tokyonight.nvim'
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+call plug#end()
+
+noremap <space>l :HopLineStart<CR>
+noremap <space>w :HopWord<CR>
+noremap <space>v :HopVertical<CR>
+
+
+lua << EOF
+require 'colorizer'.setup()
+require'nvim-treesitter.configs'.setup({
+  -- A list of parser names, or "all" (the five listed parsers should always be installed)
+  ensure_installed = {"javascript", "typescript", "go", "lua", "dart", "astro"},
+
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  -- Automatically install missing parsers when entering buffer
+  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+  auto_install = true,
+
+  -- List of parsers to ignore installing (for "all")
+  ignore_install = {},
+
+  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
+  -- parser_install_dir = "/some/path/to/store/parsers", -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
+
+  highlight = {
+    enable = true,
+
+    -- NOTE: these are the names of the parsers and not the filetype. (for example if you want to
+    -- disable highlighting for the `tex` filetype, you need to include `latex` in this list as this is
+    -- the name of the parser)
+    -- list of language that will be disabled
+    disable = {},
+    -- Or use a function for more flexibility, e.g. to disable slow treesitter highlight for large files
+    disable = function(lang, buf)
+        local max_filesize = 100 * 1024 -- 100 KB
+        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+        if ok and stats and stats.size > max_filesize then
+            return true
+        end
+    end,
+
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false,
+  },
+  rainbow = {
+      enable=true,
+      extended_mode = true,
+      max_file_lines = nil
+    }
+})
+
+require'hop'.setup()
+local hop = require('hop')
+local directions = require('hop.hint').HintDirection
+
+-- OR setup with some options
+local function on_attach(bufnr)
+  local api = require('nvim-tree.api')
+
+  local function opts(desc)
+    return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+  end
+  -- Default mappings. Feel free to modify or remove as you wish.
+  --
+  -- BEGIN_DEFAULT_ON_ATTACH
+  vim.keymap.set('n', '<C-]>', api.tree.change_root_to_node,          opts('CD'))
+  vim.keymap.set('n', '<C-e>', api.node.open.replace_tree_buffer,     opts('Open: In Place'))
+  vim.keymap.set('n', '<C-k>', api.node.show_info_popup,              opts('Info'))
+  vim.keymap.set('n', '<C-r>', api.fs.rename_sub,                     opts('Rename: Omit Filename'))
+  vim.keymap.set('n', '<C-t>', api.node.open.tab,                     opts('Open: New Tab'))
+  vim.keymap.set('n', '<C-v>', api.node.open.vertical,                opts('Open: Vertical Split'))
+  vim.keymap.set('n', '<C-x>', api.node.open.horizontal,              opts('Open: Horizontal Split'))
+  vim.keymap.set('n', '<BS>',  api.node.navigate.parent_close,        opts('Close Directory'))
+  vim.keymap.set('n', '<CR>',  api.node.open.edit,                    opts('Open'))
+  vim.keymap.set('n', '<Tab>', api.node.open.preview,                 opts('Open Preview'))
+  vim.keymap.set('n', '>',     api.node.navigate.sibling.next,        opts('Next Sibling'))
+  vim.keymap.set('n', '<',     api.node.navigate.sibling.prev,        opts('Previous Sibling'))
+  vim.keymap.set('n', '.',     api.node.run.cmd,                      opts('Run Command'))
+  vim.keymap.set('n', '-',     api.tree.change_root_to_parent,        opts('Up'))
+  vim.keymap.set('n', 'a',     api.fs.create,                         opts('Create'))
+  vim.keymap.set('n', 'bmv',   api.marks.bulk.move,                   opts('Move Bookmarked'))
+  vim.keymap.set('n', 'B',     api.tree.toggle_no_buffer_filter,      opts('Toggle No Buffer'))
+  vim.keymap.set('n', 'c',     api.fs.copy.node,                      opts('Copy'))
+  vim.keymap.set('n', 'C',     api.tree.toggle_git_clean_filter,      opts('Toggle Git Clean'))
+  vim.keymap.set('n', '[c',    api.node.navigate.git.prev,            opts('Prev Git'))
+  vim.keymap.set('n', ']c',    api.node.navigate.git.next,            opts('Next Git'))
+  vim.keymap.set('n', 'd',     api.fs.remove,                         opts('Delete'))
+  vim.keymap.set('n', 'D',     api.fs.trash,                          opts('Trash'))
+  vim.keymap.set('n', 'E',     api.tree.expand_all,                   opts('Expand All'))
+  vim.keymap.set('n', 'e',     api.fs.rename_basename,                opts('Rename: Basename'))
+  vim.keymap.set('n', ']e',    api.node.navigate.diagnostics.next,    opts('Next Diagnostic'))
+  vim.keymap.set('n', '[e',    api.node.navigate.diagnostics.prev,    opts('Prev Diagnostic'))
+  vim.keymap.set('n', 'F',     api.live_filter.clear,                 opts('Clean Filter'))
+  vim.keymap.set('n', 'f',     api.live_filter.start,                 opts('Filter'))
+  vim.keymap.set('n', 'g?',    api.tree.toggle_help,                  opts('Help'))
+  vim.keymap.set('n', 'gy',    api.fs.copy.absolute_path,             opts('Copy Absolute Path'))
+  vim.keymap.set('n', 'H',     api.tree.toggle_hidden_filter,         opts('Toggle Dotfiles'))
+  vim.keymap.set('n', 'I',     api.tree.toggle_gitignore_filter,      opts('Toggle Git Ignore'))
+  vim.keymap.set('n', 'J',     api.node.navigate.sibling.last,        opts('Last Sibling'))
+  vim.keymap.set('n', 'K',     api.node.navigate.sibling.first,       opts('First Sibling'))
+  vim.keymap.set('n', 'm',     api.marks.toggle,                      opts('Toggle Bookmark'))
+  vim.keymap.set('n', 'o',     api.node.open.edit,                    opts('Open'))
+  vim.keymap.set('n', 'O',     api.node.open.no_window_picker,        opts('Open: No Window Picker'))
+  vim.keymap.set('n', 'p',     api.fs.paste,                          opts('Paste'))
+  vim.keymap.set('n', 'P',     api.node.navigate.parent,              opts('Parent Directory'))
+  vim.keymap.set('n', 'q',     api.tree.close,                        opts('Close'))
+  vim.keymap.set('n', 'r',     api.fs.rename,                         opts('Rename'))
+  vim.keymap.set('n', 'R',     api.tree.reload,                       opts('Refresh'))
+  vim.keymap.set('n', 's',     api.node.run.system,                   opts('Run System'))
+  vim.keymap.set('n', 'S',     api.tree.search_node,                  opts('Search'))
+  vim.keymap.set('n', 'U',     api.tree.toggle_custom_filter,         opts('Toggle Hidden'))
+  vim.keymap.set('n', 'W',     api.tree.collapse_all,                 opts('Collapse'))
+  vim.keymap.set('n', 'x',     api.fs.cut,                            opts('Cut'))
+  vim.keymap.set('n', 'y',     api.fs.copy.filename,                  opts('Copy Name'))
+  vim.keymap.set('n', 'Y',     api.fs.copy.relative_path,             opts('Copy Relative Path'))
+  vim.keymap.set('n', '<2-LeftMouse>',  api.node.open.edit,           opts('Open'))
+  vim.keymap.set('n', '<2-RightMouse>', api.tree.change_root_to_node, opts('CD'))
+  -- END_DEFAULT_ON_ATTACH
+
+  vim.keymap.del('n', '<C-t>', { buffer = bufnr })
+  vim.keymap.set('n', 't', api.node.open.tab, opts('Open: New Tab'))
+  vim.keymap.del('n', '<C-x>', { buffer = bufnr })
+  vim.keymap.del('n', '<C-v>', { buffer = bufnr })
+  vim.keymap.del('n', 'x', { buffer = bufnr })
+  vim.keymap.set('n', 'x', api.node.open.horizontal, opts('Open: Horizontal Split'))
+  vim.keymap.set('n', 'v', api.node.open.vertical, opts('Open: Vertical Split'))
+  end
+
+require("nvim-tree").setup({
+  on_attach = on_attach,
+  sort_by = "case_sensitive",
+  view = {
+    hide_root_folder = false,
+    adaptive_size = true,
+  },
+  renderer = {
+    group_empty = true,
+    icons = {
+      show = {
+        file = true,
+        folder = true,
+        folder_arrow = true,
+        modified = true
+        }
+      }
+  },
+  filters = {
+    dotfiles = true,
+  },
+  actions = {
+    open_file = {
+      quit_on_open = true,
+    },
+  }
+})
+
+EOF
+
+
+
+nnoremap <leader>n :NvimTreeFocus<CR>
+nnoremap [t :NvimTreeToggle<CR>
+nnoremap [f :NvimTreeFindFile<CR>
+
+lua << EOF
+require('nvim_comment').setup()
+
+ --Bubbles config for lualine
+ --Author: lokesh-krishna
+ --MIT license, see LICENSE for more details.
+
+ --stylua: ignore
+local colors = {
+  blue   = '#80a0ff',
+  cyan   = '#79dac8',
+  black  = '#080808',
+  white  = '#c6c6c6',
+  red    = '#ff5189',
+  violet = '#d183e8',
+  grey   = '#303030',
+}
+
+local bubbles_theme = {
+  normal = {
+    a = { fg = colors.black, bg = colors.violet },
+    b = { fg = colors.white, bg = colors.grey },
+    c = { fg = colors.black, bg = colors.black },
+  },
+
+  insert = { a = { fg = colors.black, bg = colors.blue } },
+  visual = { a = { fg = colors.black, bg = colors.cyan } },
+  replace = { a = { fg = colors.black, bg = colors.red } },
+
+  inactive = {
+    a = { fg = colors.white, bg = colors.black },
+    b = { fg = colors.white, bg = colors.black },
+    c = { fg = colors.black, bg = colors.black },
+  },
+}
+
+require('lualine').setup {
+  options = {
+    icons_enabled= true,
+    theme = tokyonight,
+    component_separators = '|',
+    --section_separators = { left = '', right = '' },
+  },
+  sections = {
+    lualine_a = {
+      --{ 'mode', separator = { left = '' }, right_padding = 2 },
+      { 'mode', right_padding = 2 },
+    },
+    lualine_b = { 'filename', 'branch' },
+    lualine_c = { 'fileformat' },
+    lualine_x = {},
+    lualine_y = { 'filetype', 'progress' },
+    lualine_z = {
+      --{ 'location', separator = { right = '' }, left_padding = 2 },
+      { 'location', left_padding = 2 },
+    },
+  },
+  inactive_sections = {
+    lualine_a = { 'filename' },
+    lualine_b = {},
+    lualine_c = {},
+    lualine_x = {},
+    lualine_y = {},
+    lualine_z = { 'location' },
+  },
+  tabline = {},
+  extensions = {},
+}
+EOF
+
+noremap <A-Left>  :-tabmove<cr>
+noremap <A-Right> :+tabmove<cr>
+
+nnoremap <esc> :noh<return><esc>
+nnoremap <esc>^[ <esc>^[
+autocmd FileType scss setl iskeyword+=@-@
+autocmd BufRead,BufEnter *.astro set filetype=astro
+autocmd BufRead,BufNewFile .babelrc,.eslintrc,.stylelintrc set filetype=json
+autocmd BufRead,BufNewFile .sequelizerc set filetype=javascript
+
+if (has("nvim"))
+	let $NVIM_TUI_ENABLE_TRUE_COLOR=1
+endif
+
+if (has("termguicolors"))
+	set termguicolors
+endif
+
+if has("nvim-0.5.0") || has("patch-8.1.1564")
+  set signcolumn=auto
+else
+  set signcolumn=auto
+endif
+
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1):
+      \ CheckBackspace() ? "\<Tab>" :
+      \ coc#refresh()
+
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+inoremap <silent><expr> <c-space> coc#refresh()
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+  hi CocSearch ctermfg=12 guifg=#18A3FF
+  hi CocMenuSel ctermbg=109 guibg=#13354A
+
+  function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+  endfunction
+
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
+  else
+    call feedkeys('K', 'in')
+  endif
+endfunction
+
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+nmap <leader>rn <Plug>(coc-rename)
+
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+nmap <leader>ac  <Plug>(coc-codeaction)
+nmap <leader>qf  <Plug>(coc-fix-current)
+ 
+nmap <leader>cl  <Plug>(coc-codelens-action)
+
+xmap if <Plug>(coc-funcobj-i)
+omap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap af <Plug>(coc-funcobj-a)
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
+
+if has('nvim-0.4.0') || has('patch-8.2.0750')
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+  inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+  inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+  vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+endif
+
+command! -nargs=0 Format :call CocActionAsync('format')
+
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+command! -nargs=0 OR   :call     CocActionAsync('runCommand', 'editor.action.organizeImport')
+
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+
+let g:astro_typescript = 'enable'
+
+let s:clip = '/mnt/c/Windows/System32/clip.exe'  
+if executable(s:clip)
+    augroup WSLYank
+        autocmd!
+        autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:clip, @0) | endif
+    augroup END
+endif
+
+imap jj <Esc>
+nmap <S-l> gt
+nmap <S-h> gT
+
+colorscheme catppuccin-frappe
+
+
+nmap <C-s> :w<CR>
+imap <C-l> <C-o>a
+imap <C-;> <C-o>$
+nnoremap <silent><A-j> :set paste<CR>m`o<Esc>``:set nopaste<CR>
+nnoremap <silent><A-k> :set paste<CR>m`O<Esc>``:set nopaste<CR>
+
