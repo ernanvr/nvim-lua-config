@@ -1,5 +1,6 @@
 vim.o.background = 'dark'
 vim.opt.autoindent = true
+vim.opt.smartindent = true
 vim.opt.cursorline = true
 vim.opt.autowrite = true
 vim.opt.clipboard = "unnamedplus"
