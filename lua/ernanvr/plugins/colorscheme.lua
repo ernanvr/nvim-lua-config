@@ -4,7 +4,13 @@ return {
   name = "catppuccin",
   priority = 1000,
   config = function()
-    vim.cmd([[colorscheme catppuccin-frappe]])
+      local catppuccin = require("catppuccin")
+      catppuccin.setup({
+        integrations = {
+          barbar = true
+        }
+      })
+      vim.cmd([[colorscheme catppuccin-frappe]])
     end,
  }
 }

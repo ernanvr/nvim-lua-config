@@ -1,6 +1,4 @@
 {
-	"tailwindCSS.emmetCompletions": true,
-	"tailwindCSS.headwind.runOnSave": true,
   "suggest.noselect": true,
   "eslint.run":"onSave",
   "eslint.autoFixOnSave": true,
@@ -15,7 +13,6 @@
   "[astro]":{
     "coc.preferences.formatOnSave": true,
   },
-  "css.lint.unknownAtRules": "ignore",
   "prettier.requireConfig": true,
   "prettier.disableLanguages": ["javascript", "typescriptreact", "typescript", "javascriptreact"],
   "Lua.diagnostics.globals": ["vim"]
