@@ -2,7 +2,28 @@ vim.cmd([[ autocmd FileType scss setl iskeyword+=@-@ ]])
 vim.cmd([[autocmd BufRead,BufEnter *.astro set filetype=astro]])
 vim.cmd([[autocmd BufRead,BufNewFile .babelrc,.eslintrc,.stylelintrc set filetype=json]])
 vim.cmd([[autocmd BufRead,BufNewFile .sequelizerc set filetype=javascript]])
+vim.cmd([[ au TextYankPost * silent! lua vim.highlight.on_yank{timeout=300} ]])
+vim.cmd([[
+	inoremap <expr> <CR> InsertMapForEnter()
+	function! InsertMapForEnter()
+			if pumvisible()
+					return "\<C-y>"
+			elseif strcharpart(getline('.'),getpos('.')[2]-1,1) == '}'
+					return "\<CR>\<Esc>O"
+			elseif strcharpart(getline('.'),getpos('.')[2]-1,2) == '</'
+					return "\<CR>\<Esc>O"
+			elseif strcharpart(getline('.'),getpos('.')[2]-1,2) == ']'
+					return "\<CR>\<Esc>O"
+			elseif strcharpart(getline('.'),getpos('.')[2]-1,2) == ')'
+					return "\<CR>\<Esc>O"
+			else
+					return "\<CR>"
+			endif
+	endfunction
+]])
 
+-- vim.cmd [[ autocmd RecordingEnter * set cmdheight=1 ]]
+-- vim.cmd [[ autocmd RecordingLeave * set cmdheight=0 ]]
 
 -- if vim.fn.has("wsl") == 1 then
 --     if vim.fn.executable("wl-copy") == 0 then
@@ -26,7 +47,6 @@ vim.cmd([[autocmd BufRead,BufNewFile .sequelizerc set filetype=javascript]])
 --         }
 --     end
 -- end
-
 
 -- In_wsl = os.getenv('WSL_DISTRO_NAME') ~= nil
 --

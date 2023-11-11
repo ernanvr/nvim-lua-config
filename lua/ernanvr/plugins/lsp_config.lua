@@ -1,5 +1,5 @@
 return {
-		{
+	{
 		"neovim/nvim-lspconfig",
 		event = { "BufReadPre", "BufNewFile" },
 		dependencies = {
@@ -82,7 +82,6 @@ return {
 				capabilities = capabilities,
 				on_attach = on_attach,
 			})
-			
 			-- configure typescript server with plugin
 			lspconfig["tsserver"].setup({
 				capabilities = capabilities,
@@ -105,7 +104,7 @@ return {
 			lspconfig["emmet_ls"].setup({
 				capabilities = capabilities,
 				on_attach = on_attach,
-				filetypes = { "html", "typescriptreact", "javascriptreact", "css" },
+				filetypes = { "html", "typescriptreact", "javascriptreact", "css", "astro" },
 			})
 
 			-- configure lua server (with special settings)
@@ -131,124 +130,124 @@ return {
 		end,
 	},
 	{
-  "williamboman/mason.nvim",
-  dependencies = {
-    "williamboman/mason-lspconfig.nvim",
-    "WhoIsSethDaniel/mason-tool-installer.nvim",
-  },
-  config = function()
-    -- import mason
-    local mason = require("mason")
+		"williamboman/mason.nvim",
+		dependencies = {
+			"williamboman/mason-lspconfig.nvim",
+			"WhoIsSethDaniel/mason-tool-installer.nvim",
+		},
+		config = function()
+			-- import mason
+			local mason = require("mason")
 
-    -- import mason-lspconfig
-    local mason_lspconfig = require("mason-lspconfig")
+			-- import mason-lspconfig
+			local mason_lspconfig = require("mason-lspconfig")
 
-    local mason_tool_installer = require("mason-tool-installer")
+			local mason_tool_installer = require("mason-tool-installer")
 
-    -- enable mason and configure icons
-    mason.setup({
-      ui = {
-        icons = {
-          package_installed = "✓",
-          package_pending = "➜",
-          package_uninstalled = "✗",
-        },
-      },
-    })
+			-- enable mason and configure icons
+			mason.setup({
+				ui = {
+					icons = {
+						package_installed = "✓",
+						package_pending = "➜",
+						package_uninstalled = "✗",
+					},
+				},
+			})
 
-    mason_lspconfig.setup({
-      -- list of servers for mason to install
-      ensure_installed = {
-        "tsserver",
-        "html",
-        "cssls",
-        "tailwindcss",
-        "lua_ls",
-        "emmet_ls",
-				"astro"
-      },
-      -- auto-install configured servers (with lspconfig)
-      automatic_installation = true, -- not the same as ensure_installed
-    })
+			mason_lspconfig.setup({
+				-- list of servers for mason to install
+				ensure_installed = {
+					"tsserver",
+					"html",
+					"cssls",
+					"tailwindcss",
+					"lua_ls",
+					"emmet_ls",
+					"astro",
+				},
+				-- auto-install configured servers (with lspconfig)
+				automatic_installation = true, -- not the same as ensure_installed
+			})
 
-    mason_tool_installer.setup({
-      ensure_installed = {
-        "prettier", -- prettier formatter
-        "stylua", -- lua formatter
-        "eslint_d", -- js linter
-      },
-    })
-  end,
-},
-{
-  "nvimtools/none-ls.nvim", -- configure formatters & linters
-  lazy = true,
-  -- event = { "BufReadPre", "BufNewFile" }, -- to enable uncomment this
-  dependencies = {
-    "jay-babu/mason-null-ls.nvim",
-  },
-  config = function()
-    local mason_null_ls = require("mason-null-ls")
+			mason_tool_installer.setup({
+				ensure_installed = {
+					"prettier", -- prettier formatter
+					"stylua", -- lua formatter
+					"eslint_d", -- js linter
+				},
+			})
+		end,
+	},
+	{
+		"nvimtools/none-ls.nvim", -- configure formatters & linters
+		lazy = true,
+		-- event = { "BufReadPre", "BufNewFile" }, -- to enable uncomment this
+		dependencies = {
+			"jay-babu/mason-null-ls.nvim",
+		},
+		config = function()
+			local mason_null_ls = require("mason-null-ls")
 
-    local null_ls = require("null-ls")
+			local null_ls = require("null-ls")
 
-    local null_ls_utils = require("null-ls.utils")
+			local null_ls_utils = require("null-ls.utils")
 
-    mason_null_ls.setup({
-      ensure_installed = {
-        "prettier", -- prettier formatter
-        "stylua", -- lua formatter
-        "eslint_d", -- js linter
-      },
-    })
+			mason_null_ls.setup({
+				ensure_installed = {
+					"prettier", -- prettier formatter
+					"stylua", -- lua formatter
+					"eslint_d", -- js linter
+				},
+			})
 
-    -- for conciseness
-    local formatting = null_ls.builtins.formatting -- to setup formatters
-    local diagnostics = null_ls.builtins.diagnostics -- to setup linters
+			-- for conciseness
+			local formatting = null_ls.builtins.formatting -- to setup formatters
+			local diagnostics = null_ls.builtins.diagnostics -- to setup linters
 
-    -- to setup format on save
-    local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+			-- to setup format on save
+			local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
-    -- configure null_ls
-    null_ls.setup({
-      -- add package.json as identifier for root (for typescript monorepos)
-      root_dir = null_ls_utils.root_pattern(".null-ls-root", "Makefile", ".git", "package.json"),
-      -- setup formatters & linters
-      sources = {
-        --  to disable file types use
-        --  "formatting.prettier.with({disabled_filetypes: {}})" (see null-ls docs)
-        formatting.prettier.with({
-          extra_filetypes = { "astro" },
-        }), -- js/ts formatter
-        formatting.stylua, -- lua formatter
-        -- formatting.isort,
-        -- formatting.black,
-        diagnostics.eslint_d.with({ -- js/ts linter
-          condition = function(utils)
-            return utils.root_has_file({ ".eslintrc.js", ".eslintrc.cjs" }) -- only enable if root has .eslintrc.js or .eslintrc.cjs
-          end,
-        }),
-      },
-      -- configure format on save
-      on_attach = function(current_client, bufnr)
-        if current_client.supports_method("textDocument/formatting") then
-          vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            group = augroup,
-            buffer = bufnr,
-            callback = function()
-              vim.lsp.buf.format({
-                filter = function(client)
-                  --  only use null-ls for formatting instead of lsp server
-                  return client.name == "null-ls"
-                end,
-                bufnr = bufnr,
-              })
-            end,
-          })
-        end
-      end,
-    })
-  end,
-}
+			-- configure null_ls
+			null_ls.setup({
+				-- add package.json as identifier for root (for typescript monorepos)
+				root_dir = null_ls_utils.root_pattern(".null-ls-root", "Makefile", ".git", "package.json"),
+				-- setup formatters & linters
+				sources = {
+					--  to disable file types use
+					--  "formatting.prettier.with({disabled_filetypes: {}})" (see null-ls docs)
+					formatting.prettier.with({
+						extra_filetypes = { "*.json", "*.astro" },
+					}), -- js/ts formatter
+					formatting.stylua, -- lua formatter
+					-- formatting.isort,
+					-- formatting.black,
+					diagnostics.eslint_d.with({ -- js/ts linter
+						condition = function(utils)
+							return utils.root_has_file({ ".eslintrc.js", ".eslintrc.cjs" }) -- only enable if root has .eslintrc.js or .eslintrc.cjs
+						end,
+					}),
+				},
+				-- configure format on save
+				on_attach = function(current_client, bufnr)
+					if current_client.supports_method("textDocument/formatting") then
+						vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+						vim.api.nvim_create_autocmd("BufWritePre", {
+							group = augroup,
+							buffer = bufnr,
+							callback = function()
+								vim.lsp.buf.format({
+									filter = function(client)
+										--  only use null-ls for formatting instead of lsp server
+										return client.name == "null-ls"
+									end,
+									bufnr = bufnr,
+								})
+							end,
+						})
+					end
+				end,
+			})
+		end,
+	},
 }
