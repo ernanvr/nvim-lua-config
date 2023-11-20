@@ -8,12 +8,16 @@ local M = {
 		"hrsh7th/cmp-cmdline",
 		"saadparwaiz1/cmp_luasnip",
 		"L3MON4D3/LuaSnip",
+		"rafamadriz/friendly-snippets",
 	},
 }
 
 M.config = function()
 	local cmp = require("cmp")
 	local luasnip = require("luasnip")
+
+	require("luasnip.loaders.from_vscode").lazy_load()
+
 	vim.opt.completeopt = { "menu", "menuone", "noselect" }
 
 	cmp.setup({

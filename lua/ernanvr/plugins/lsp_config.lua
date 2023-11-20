@@ -92,12 +92,26 @@ return {
 			lspconfig["cssls"].setup({
 				capabilities = capabilities,
 				on_attach = on_attach,
+				settings = {
+					css = {
+						lint = {
+							unknownAtRules = "ignore",
+						},
+					},
+				},
 			})
 
 			-- configure tailwindcss server
 			lspconfig["tailwindcss"].setup({
 				capabilities = capabilities,
 				on_attach = on_attach,
+				settings = {
+					tailwindCSS = {
+						lint = {
+							unknownAtRules = "ignore",
+						},
+					},
+				},
 			})
 
 			-- configure emmet language server

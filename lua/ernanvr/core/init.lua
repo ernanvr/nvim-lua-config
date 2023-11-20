@@ -2,7 +2,7 @@ vim.cmd([[ autocmd FileType scss setl iskeyword+=@-@ ]])
 vim.cmd([[autocmd BufRead,BufEnter *.astro set filetype=astro]])
 vim.cmd([[autocmd BufRead,BufNewFile .babelrc,.eslintrc,.stylelintrc set filetype=json]])
 vim.cmd([[autocmd BufRead,BufNewFile .sequelizerc set filetype=javascript]])
-vim.cmd([[ au TextYankPost * silent! lua vim.highlight.on_yank{timeout=300} ]])
+vim.cmd([[ au TextYankPost * silent! lua vim.highlight.on_yank{timeout=100} ]])
 vim.cmd([[
 	inoremap <expr> <CR> InsertMapForEnter()
 	function! InsertMapForEnter()
@@ -22,8 +22,8 @@ vim.cmd([[
 	endfunction
 ]])
 
--- vim.cmd [[ autocmd RecordingEnter * set cmdheight=1 ]]
--- vim.cmd [[ autocmd RecordingLeave * set cmdheight=0 ]]
+-- vim.cmd([[ autocmd RecordingEnter * set cmdheight=1 ]])
+-- vim.cmd([[ autocmd RecordingLeave * set cmdheight=0 ]])
 
 -- if vim.fn.has("wsl") == 1 then
 --     if vim.fn.executable("wl-copy") == 0 then
