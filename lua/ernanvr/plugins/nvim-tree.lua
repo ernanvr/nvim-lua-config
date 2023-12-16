@@ -31,6 +31,7 @@ return {
 			on_attach = my_on_attach,
 			view = {
 				width = 40,
+				side = "right",
 			},
 			actions = {
 				open_file = {
