@@ -17,7 +17,7 @@ return {
 				yaml = { "prettier" },
 				markdown = { "prettier" },
 				lua = { "stylua" },
-				astro = { "astro" },
+				astro = { "prettier" },
 			},
 			format_on_save = {
 				lsp_fallback = true,
